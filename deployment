@@ -1,0 +1,43 @@
+# Fake News Detection API using FastAPI
+
+from fastapi import FastAPI, HTTPException
+import joblib
+import os
+
+app = FastAPI()
+
+# Load pre-trained model with error handling
+MODEL_PATH = 'model/fake_news_model.pkl'
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError(f'Model file not found at {MODEL_PATH}')
+
+model = joblib.load(MODEL_PATH)
+
+@app.get('/')
+async def root():
+    return {"message": "Fake News Detection API is running"}
+
+@app.post('/predict/')
+async def predict(text: str):
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="Input text cannot be empty")
+
+    prediction = model.predict([text])[0]
+    result = "Fake" if prediction == 1 else "Real"
+    return {"prediction": result}
+
+# Dockerfile
+# FROM python:3.9
+# WORKDIR /app
+# COPY . .
+# RUN pip install -r requirements.txt
+# EXPOSE 8000
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# How to Run
+# 1. Build Docker Image: docker build -t fake-news-detection .
+# 2. Run Docker Container: docker run -p 8000:8000 fake-news-detection
+# 3. Access API at: http://localhost:8000
+
+
+The Fake News Detection API code is now complete
